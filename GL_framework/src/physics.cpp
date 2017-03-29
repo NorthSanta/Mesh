@@ -38,6 +38,7 @@ float v1;
 float v2;
 float ke;
 float kd;
+float llargada;
 
 float mass = 1;
 struct Particle
@@ -83,8 +84,9 @@ void GUI() {
 
 void PhysicsInit() {
 	//TODO
-	ke = 1;
-	kd = 1;
+	ke = 1;//duresa de la molla
+	kd = 2;//restriccio del moviment
+	llargada = 0.5f;
 	reset = 20;
 	radius = ((float)rand() / RAND_MAX)*1.5+0.5;
 	//printf("%f", radius);
@@ -135,7 +137,7 @@ void PhysicsInit() {
 			totalParts[i*numCols + j].Forces.z = 0;
 
 			totalParts[i*numCols + j].velocity.x = 0;
-			totalParts[i*numCols + j].velocity.y = 0;
+			totalParts[i*numCols + j].velocity.y = 2;
 			totalParts[i*numCols + j].velocity.z = 0;
 
 			data[3 * (i*numCols + j) + 0] = totalParts[i*numCols + j].pos.x;
@@ -155,7 +157,9 @@ void PhysicsInit() {
 	posZ = data[41];
 	
 	ClothMesh::updateClothMesh(data);
+	
 }
+
 void PhysicsUpdate(float dt) {
 	
 	reset -= dt;
@@ -176,25 +180,29 @@ void PhysicsUpdate(float dt) {
 			totalParts[i*numCols + j].pos.z = totalParts[i*numCols + j].pos.z + (totalParts[i*numCols + j].pos.z - totalParts[i*numCols + j].antPos.z) + (totalParts[i*numCols + j].Forces.z / mass)*(dt*dt);
 
 			totalParts[i*numCols + j].velocity = (totalParts[i*numCols + j].pos - totalParts[i*numCols + j].antPos) / dt;
+			//printf("%f", totalParts[i*numCols + j].velocity.z);
 			totalParts[0].pos = glm::vec3(posX0, posY0, posZ0);
 			totalParts[13].pos = glm::vec3(posX, posY, posZ);
 			totalParts[i*numCols + j].antPos = temp;
 
-			if (j== 0 && i < 17 || j == 13 && i < 17) {
+			if (j== 0 && i < 17  ) {
 
 				p1 = glm::vec3(totalParts[i*numCols + j].pos.x, totalParts[i*numCols + j].pos.y, totalParts[i*numCols + j].pos.z);
 
 				p2 = glm::vec3(totalParts[(i+1)*numCols + j].pos.x, totalParts[(i+1)*numCols + j].pos.y, totalParts[(i+1)*numCols + j].pos.z);
-
+				
+				
 				vec = p1 - p2;
 				
 				modul = glm::length(vec);//modul del vector
-				
-				float var = -(ke*(modul - 0.5f) + kd * glm::dot((totalParts[i*numCols + j].velocity - totalParts[i*numCols + j + 1].velocity), (vec / modul)));
+			
+				float var = -(ke*(modul - llargada) + kd * glm::dot((totalParts[i*numCols + j].velocity - totalParts[(i + 1)*numCols + j].velocity), (vec / modul)));
 				structuralForce = var*(vec / modul);
-				//printf("%f", var);
-				totalParts[i*numCols + j].Forces = structuralForce;
-				totalParts[(i+1)*numCols + j].Forces = -structuralForce;
+				printf("%f", structuralForce.y);
+				
+				totalParts[i*numCols + j].Forces += structuralForce;
+				totalParts[(i + 1)*numCols + j].Forces += -structuralForce;
+					
 			}
 			/*if (j == 0 && i == 1) {
 				
