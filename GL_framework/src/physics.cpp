@@ -172,7 +172,7 @@ void PhysicsUpdate(float dt) {
 		for (int j = 0; j < (numCols); ++j) {
 			glm::vec3 temp = totalParts[i*numCols + j].pos;
 			glm::vec3 structuralForce;
-			
+
 			totalParts[i*numCols + j].pos.x = totalParts[i*numCols + j].pos.x + (totalParts[i*numCols + j].pos.x - totalParts[i*numCols + j].antPos.x) + (totalParts[i*numCols + j].Forces.x / mass)*(dt*dt);
 
 			totalParts[i*numCols + j].pos.y = totalParts[i*numCols + j].pos.y + (totalParts[i*numCols + j].pos.y - totalParts[i*numCols + j].antPos.y) + (totalParts[i*numCols + j].Forces.y / mass)*(dt*dt);
@@ -185,51 +185,70 @@ void PhysicsUpdate(float dt) {
 			totalParts[13].pos = glm::vec3(posX, posY, posZ);
 			totalParts[i*numCols + j].antPos = temp;
 
-			if (j== 0 && i < 17  ) {
+			if (j < 13 && i < 17) {
 
 				p1 = glm::vec3(totalParts[i*numCols + j].pos.x, totalParts[i*numCols + j].pos.y, totalParts[i*numCols + j].pos.z);
 
-				p2 = glm::vec3(totalParts[(i+1)*numCols + j].pos.x, totalParts[(i+1)*numCols + j].pos.y, totalParts[(i+1)*numCols + j].pos.z);
-				
-				
+				p2 = glm::vec3(totalParts[(i + 1)*numCols + j].pos.x, totalParts[(i + 1)*numCols + j].pos.y, totalParts[(i + 1)*numCols + j].pos.z);
+
+
 				vec = p1 - p2;
-				
+
 				modul = glm::length(vec);//modul del vector
-			
+
 				float var = -(ke*(modul - llargada) + kd * glm::dot((totalParts[i*numCols + j].velocity - totalParts[(i + 1)*numCols + j].velocity), (vec / modul)));
 				structuralForce = var*(vec / modul);
-				printf("%f", structuralForce.y);
-				
+				//printf("%f", structuralForce.y);
+
 				totalParts[i*numCols + j].Forces += structuralForce;
 				totalParts[(i + 1)*numCols + j].Forces += -structuralForce;
-					
+
+			}
+			if (j < 13 && i < 17) {
+
+				p1 = glm::vec3(totalParts[i*numCols + j].pos.x, totalParts[i*numCols + j].pos.y, totalParts[i*numCols + j].pos.z);
+
+				p2 = glm::vec3(totalParts[(i)*numCols + (j + 1)].pos.x, totalParts[(i)*numCols + (j + 1)].pos.y, totalParts[(i)*numCols + (j + 1)].pos.z);
+
+
+				vec = p1 - p2;
+
+				modul = glm::length(vec);//modul del vector
+
+				float var = -(ke*(modul - llargada) + kd * glm::dot((totalParts[i*numCols + j].velocity - totalParts[(i)*numCols + (j + 1)].velocity), (vec / modul)));
+				structuralForce = var*(vec / modul);
+				//printf("%f", structuralForce.y);
+
+				totalParts[i*numCols + j].Forces += structuralForce;
+				totalParts[(i)*numCols + (j + 1)].Forces += -structuralForce;
+
 			}
 			/*if (j == 0 && i == 1) {
-				
-				structuralForce = -structuralForce;
-				totalParts[i*numCols + j].Forces = structuralForce;
+
+			structuralForce = -structuralForce;
+			totalParts[i*numCols + j].Forces = structuralForce;
 			}*/
-			
-			
+
+
 
 			data[3 * (i*numCols + j) + 0] = totalParts[i*numCols + j].pos.x;
 			data[3 * (i*numCols + j) + 1] = totalParts[i*numCols + j].pos.y;
 			data[3 * (i*numCols + j) + 2] = totalParts[i*numCols + j].pos.z;
-			
+
 			if (data[3 * (i*numCols + j) + 2] <= -5) {
 				data[3 * (i*numCols + j) + 2] = -5;
 			}
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
 	/*data[0] = posX0;
 	data[1] = posY0;
 	data[2] = posZ0;
@@ -238,11 +257,12 @@ void PhysicsUpdate(float dt) {
 	data[40] = posY;
 	data[41] = posZ;*/
 	ClothMesh::updateClothMesh(data);
-	
-	
-	
+
+
+
 }
 void PhysicsCleanup() {
 	//TODO
 	ClothMesh::cleanupClothMesh();
+	delete[] totalParts;
 }
